@@ -1,0 +1,24 @@
+name: Lint
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+      - name: lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          only-new-issues: true
