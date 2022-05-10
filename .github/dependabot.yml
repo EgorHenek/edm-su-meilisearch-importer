@@ -8,7 +8,7 @@ updates:
       time: "08:00"
       timezone: "Asia/Yekaterinburg"
     commit-message:
-      prefix: "Go module update"
+      prefix: "Go module"
     labels:
       - "dependencies"
 
