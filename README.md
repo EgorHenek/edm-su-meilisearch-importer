@@ -2,10 +2,6 @@
 ## Установка
 1. Загрузите последнюю версию программы из [GitHub](https://github.com/EgorHenek/edm-su-meilisearch-import)
 2. Запустите программу из командной строки
-
-#### Команды и аргументы программы
 ````bash
-./edm-su-meilisearch-import --help
+./edm-su-meilisearch-importer-v2.0.0-darwin-arm64 --help
 ````
-
-_**Примеры файлов для импорта в репозитории программы**_
