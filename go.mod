@@ -5,11 +5,12 @@ go 1.18
 require (
 	github.com/jackc/pgx/v4 v4.16.1
 	github.com/meilisearch/meilisearch-go v0.19.1
-	github.com/urfave/cli/v2 v2.6.0
+	github.com/urfave/cli/v2 v2.7.1
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
+	github.com/antzucaro/matchr v0.0.0-20210222213004-b04723ef80f0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
