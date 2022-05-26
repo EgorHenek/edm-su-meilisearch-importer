@@ -14,6 +14,8 @@ import (
 
 var conn *pgx.Conn
 
+var msClient *meilisearch.Client
+
 type Video struct {
 	ID          int    `json:"id"`
 	Title       string `json:"title"`
@@ -52,6 +54,19 @@ func main() {
 				Usage:   "Import videos",
 				Action:  videosHandler(),
 			},
+			{
+				Name: "config",
+				Aliases: []string{"c"},
+				Usage:   "Configure MeiliSearch Indexes",
+				Action:  configHandler(),
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "videos-index",
+						Value: "videos",
+						Usage: "MeiliSearch videos index name",
+					},
+				},
+			},
 		},
 	}
 
@@ -61,12 +76,36 @@ func main() {
 	}
 }
 
+func configHandler() func(c *cli.Context) error {
+	return func(c *cli.Context) error {
+		initMsClient(c)
+		videosIndex := msClient.Index(c.String("videos-index"))
+		task, err := videosIndex.UpdateSettings(&meilisearch.Settings{
+			SortableAttributes: []string{"title", "date"},
+			FilterableAttributes: []string{"slug"},
+			RankingRules: []string{
+				"sort",
+				"words",
+				"typo",
+				"proximity",
+				"attribute",
+				"exactness",
+			},
+		})
+		if err != nil {
+			log.Fatal(err)
+		}
+		_, err = msClient.WaitForTask(task)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return nil
+	}
+}
+
 func videosHandler() func(c *cli.Context) error {
 	return func(c *cli.Context) error {
-		msClient := meilisearch.NewClient(meilisearch.ClientConfig{
-			Host:   c.String("host"),
-			APIKey: c.String("api-key"),
-		})
+		initMsClient(c)
 
 		var err error
 		conn, err = pgx.Connect(context.Background(), c.String("pg-url"))
@@ -131,4 +170,11 @@ func listVideos() ([]Video, error) {
 		videos = append(videos, video)
 	}
 	return videos, rows.Err()
+}
+
+func initMsClient(c *cli.Context) {
+	msClient = meilisearch.NewClient(meilisearch.ClientConfig{
+		Host:   c.String("host"),
+		APIKey: c.String("api-key"),
+	})
 }
