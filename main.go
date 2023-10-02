@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -35,16 +34,25 @@ func main() {
 				Name:  "host",
 				Value: "http://localhost:7700",
 				Usage: "MeiliSearch host",
+				EnvVars: []string{
+					"MEILISEARCH_HOST",
+				},
 			},
 			&cli.StringFlag{
 				Name:  "api-key",
 				Value: "",
 				Usage: "MeiliSearch API key",
+				EnvVars: []string{
+					"MEILISEARCH_API_KEY",
+				},
 			},
 			&cli.StringFlag{
 				Name:  "pg-url",
 				Value: "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable",
 				Usage: "Postgres URL",
+				EnvVars: []string{
+					"POSTGRES_URL",
+				},
 			},
 		},
 		Commands: []*cli.Command{
@@ -55,7 +63,7 @@ func main() {
 				Action:  videosHandler(),
 			},
 			{
-				Name: "config",
+				Name:    "config",
 				Aliases: []string{"c"},
 				Usage:   "Configure MeiliSearch Indexes",
 				Action:  configHandler(),
@@ -81,8 +89,8 @@ func configHandler() func(c *cli.Context) error {
 		initMsClient(c)
 		videosIndex := msClient.Index(c.String("videos-index"))
 		task, err := videosIndex.UpdateSettings(&meilisearch.Settings{
-			SortableAttributes: []string{"title", "date"},
-			FilterableAttributes: []string{"slug"},
+			SortableAttributes:   []string{"title", "date"},
+			FilterableAttributes: []string{"slug", "yt_id"},
 			RankingRules: []string{
 				"sort",
 				"words",
@@ -95,7 +103,7 @@ func configHandler() func(c *cli.Context) error {
 		if err != nil {
 			log.Fatal(err)
 		}
-		_, err = msClient.WaitForTask(task)
+		_, err = msClient.WaitForTask(task.TaskUID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -120,16 +128,12 @@ func videosHandler() func(c *cli.Context) error {
 		}
 
 		index := msClient.Index("videos")
-		data, err := json.Marshal(videos)
-		if err != nil {
-			log.Fatal(err)
-		}
-		task, err := index.AddDocumentsNdjson(data)
+		task, err := index.AddDocuments(videos)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		_, err = msClient.WaitForTask(task)
+		_, err = msClient.WaitForTask(task.TaskUID)
 		if err != nil {
 			return err
 		}
