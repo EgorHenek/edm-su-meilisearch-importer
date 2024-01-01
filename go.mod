@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/jackc/pgx/v4 v4.16.1
 	github.com/meilisearch/meilisearch-go v0.26.0
-	github.com/urfave/cli/v2 v2.26.0
+	github.com/urfave/cli/v2 v2.27.1
 )
 
 require (
